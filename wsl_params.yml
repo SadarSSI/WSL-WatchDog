@@ -1,0 +1,71 @@
+# Set Parameters
+WSLCommon :
+  
+  KillallBeforeStarting : $True # not use 
+
+  Distro          : YourDistributionName
+  StopWSL         : --distribution $Distrib --shutdown
+  StartWSL        : --distribution $Distrib /home/didier/start.sh
+  GetWSLVer       : --distribution $Distrib --list --all --verbose
+  GetWSLIP        : hostname -I
+
+  # "vEthernet (WSL)" @IP
+  vEthAlias       : "vEthernet (WSL)"
+  vEthIP          : 172.40.1.10    # New-NetIPAddress -InterfaceAlias "vEthernet (WSL)" –IPAddress 172.40.1.10 –PrefixLength 20
+  vEthMasq        : 255.255.240/20 # 20
+  DisableIPV6     : $True   # Disable-NetAdapterBinding -InterfaceAlias "vEthernet (WSL)" -ComponentID ms_tcpip6
+                            # Get-NetAdapterBinding -ComponentID ms_tcpip6
+
+ProxyV4 :
+  # need to forward 
+  ShowProxyV4ToV4 : netsh interface portproxy show v4tov4
+  DelProxyV4ToV4  : netsh int portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=$Port
+  AddProxyV4ToV4  : netsh interface portproxy add v4tov4 listenaddress=0.0.0.0 listenport=$Port connectaddress=$WSLIP connectport=$Port
+  SetProxyV4ToV4  : netsh interface portproxy set v4tov4 listenaddress=0.0.0.0 listenport=$Port connectaddress=$WSLIP connectport=$Port
+
+Ports :
+  
+  22:
+    Protocol        : TCP
+    RuleDescipt     : WSL_$Port $Protocol
+    RuleProfile     : domain,private
+    DelFirewallRule : netsh advfirewall firewall delete rule name=all protocol=$Protocol localport=$Port
+    AddFirewallRule : netsh advfirewall firewall add rule name="$RuleName" dir=in action=allow protocol=$Protocol localport=$Port profile=$RuleProfile
+  
+# https://stackoverflow.com/questions/20108886/powershell-scheduled-task-with-daily-trigger-and-repetition-interval
+# https://community.spiceworks.com/topic/2293267-adding-a-scheduled-task-trigger-instead-of-replacing
+
+Task :
+  User              : "$env:username"
+  TaskName          : _wsl_watchdog
+  ExecName          : wsl_watchdog.ps1
+  WorkDir           : C:\PathToWorkDir
+  PowerShell        : C:\Program Files\PowerShell\7\pwsh.exe
+
+  TaskUserPrincipal : New-ScheduledTaskPrincipal -UserId "$User" -RunLevel Highest -LogonType S4U
+  TaskAction        : New-ScheduledTaskAction -Execute "$PowerShell" -Argument "-executionpolicy remotesigned -File ""$WorkDir\$ExecName""" -WorkingDirectory "$WorkDir"
+  Register          : Register-ScheduledTask -TaskName "$TaskName" -Action $TaskAction -Principal $TaskUserPrincipal -Trigger $TaskTrigger -Settings $TaskSettings -Force
+
+  TasksTrigger      : 
+    Task1  : 
+      TaskType      : Auto
+      Task          : New-ScheduledTaskTrigger -AtStartup
+      TaskSettings  : New-ScheduledTaskSettingsSet -ExecutionTimeLimit 0 -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 60) -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -RunOnlyIfNetworkAvailable -DontStopOnIdleEnd -Compatibility Win8
+    Task2  : 
+      TaskType      : Add
+                    # P(eriod)0D(ays)T(ime)0H(ours)0M(inutes)0S(econds)
+                    # P0DT0H5M0S  = 0 days, 0 hours, 5 minutes, 0 seconds
+      TaskIntervall : P0DT0H5M0S
+                    
+                    # P1DT0H0M0S = 1 days, 0 hours, 0 minutes, 0 seconds
+      TaskDuration  : P1DT0H0M0S
+                    
+                    # add Daily Trigger
+      Task00        : $Triggers += (get-scheduledtask "$TaskName").Triggers; $Triggers += New-ScheduledTaskTrigger -Daily -At 1:00:00; Set-ScheduledTask -TaskName "$TaskName" -Trigger $Triggers
+                    
+                    # Set Repetition Interval & Repetition Duration    
+      Task01        : $Triggers=(get-scheduledtask "$TaskName").Triggers; $Triggers[1].Repetition.Interval="$TaskIntervall"; $Triggers[1].Repetition.Duration="$TaskDuration"; Set-ScheduledTask -TaskName "$TaskName" -Trigger $Triggers
+
+
+  unRegister        : Unregister-ScheduledTask -TaskName "$TaskName" -Confirm:`$false -ea SilentlyContinue
+  EnableHisto       : "wevtutil set-log Microsoft-Windows-TaskScheduler/Operational /enabled:$($action)"
