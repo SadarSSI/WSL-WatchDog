@@ -5,7 +5,7 @@ WSLCommon :
 
   Distro          : YourDistributionName
   StopWSL         : --distribution $Distrib --shutdown
-  StartWSL        : --distribution $Distrib /home/didier/start.sh
+  StartWSL        : --distribution $Distrib /yourfolder/start.sh
   GetWSLVer       : --distribution $Distrib --list --all --verbose
   GetWSLIP        : hostname -I
 
