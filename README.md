@@ -21,10 +21,10 @@ example with an infinite loop :
 #!/usr/bin/env bash
 while:
   do
-  sleeping 5
+  sleep 5
 done
 
 example with ssh server :
 
-sudo mkdir -p /run/sshd
-sudo /usr/sbin/sshd -D
+  sudo mkdir -p /run/sshd
+  sudo /usr/sbin/sshd -D
