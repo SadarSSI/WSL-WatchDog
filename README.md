@@ -17,9 +17,6 @@ the latest version of wsl stops if you are not connected to the console, or if t
 ### What should you do in the linux distribution ? 
 Create a start.sh file, you can change the name (see in the yaml file in WSLCommon/StartWSL), in which you will have to launch a process or create an infinite loop for WSL to remain active.
 
-### What do you need to run wsl_params.yml ?
-You must have local admin rights for the script to create firewall rules.
-
 ### What wsl_watchdog.ps1 does ?
 - An elevation of privilege (admin) if necessary like "run as administrator"
 reads wsl_params.yml
