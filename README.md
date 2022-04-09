@@ -1,5 +1,5 @@
 # WSL-WatchDog
-monitor wsl: start or restart wsl automatically, update or create firewall rules & proxy, create task...
+monitor wsl: start or restart wsl automatically, update or create firewall rules & proxy, create scheduled task...
 
 ## Why ?
 the latest version of wsl stops if you are not connected to the console, or if there is not a job / process a foreground (it can be just a loop in a shell for example)
