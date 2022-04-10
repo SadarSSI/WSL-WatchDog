@@ -46,21 +46,6 @@ function LoadParams{
     
     $script:v4tov4IP        = [regex]::matches($(Invoke-Expression $ShowProxyV4ToV4), "(172\.\d{1,3}\.\d{1,3}\.\d{1,3})").value 
   }
-function CheckIP {
-
-  $vEth = Get-NetIPAddress -InterfaceAlias $vEthAlias
-
-  if ( $vEth.IPAddress -ne $vEthIP ) {
-    Get-NetIPAddress -InterfaceAlias $vEthAlias -ea SilentlyContinue | Remove-NetIPAddress -confirm:$false
-    New-NetIPAddress -InterfaceAlias $vEthAlias –IPAddress $vEthIP –PrefixLength $vEthMasq.Remove(0, ($vEthMasq.Length - 2)) | out-null
-    if ($vEthMasq -eq $true){
-      Disable-NetAdapterBinding -InterfaceAlias $vEthAlias -ComponentID ms_tcpip6 | out-null
-    }
-    Disable-NetAdapter -Name $vEthAlias -confirm:$false | out-null
-    Enable-NetAdapter -Name $vEthAlias -confirm:$false | out-null
-    Write-Host (" " * $indent)( " " * 1 )  "$vEthAlias address : "  -ForegroundColor Red -NoNewline
-    Get-NetIPAddress -InterfaceAlias $vEthAlias
-  }
  
  }
 function CheckProcess {
@@ -167,7 +152,6 @@ function Write-Color([String[]]$Text, [ConsoleColor[]]$Color) {
 CheckSecurityLevel
 
 LoadParams
-CheckIP
 CheckProcess
 CheckFirewallRules
 CheckProxyV4
