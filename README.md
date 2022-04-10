@@ -21,9 +21,6 @@ Create a start.sh file, you can change the name (see in the yaml file in WSLComm
 - An elevation of privilege (admin) if necessary like "run as administrator"
 reads wsl_params.yml
 - load wsl_params.yml
-- check the "vEthernet (WSL)" device
-	- Change the @IP address if it doesn't match (see vEthIP in wsl_params.yml)
-	- Disable @IP if requested (see DisableIPV6 in wsl_params.yml)
 - check if the wsl distribution is active (see Distro in wsl_params.yml)
 - check Firewall rules (see Ports in wsl_params.yml)
 - check Forwardings rules (see ProxyV4 in wsl_params.yml)
