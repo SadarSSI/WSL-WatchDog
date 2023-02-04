@@ -26,6 +26,14 @@ reads wsl_params.yml
 - check Forwardings rules (see ProxyV4 in wsl_params.yml)
 
 ### What do you need to ro create wsl_watchdog sheduled task : ?
-Just call  task.ps1. This script read thle yaml file wsl_params.yml, create wsl_watchdog task with 2 triggers :
+Install [Powershell-Yaml](https://github.com/cloudbase/powershell-yaml)
+
+* In PowerShell as Administrator
+
+    `Install-Module powershell-yaml`
+
+Edit wsl_params.yml for the WSL distro to use and the location of WSL-Watchdog scripts. `wsl --list` shows installed distros.
+
+Call wsl_create_task.ps1. This script read thle yaml file wsl_params.yml, create wsl_watchdog task with 2 triggers :
 - atstartup : to start wsl_watchdog.ps1 script
 - daily : start wsl_watchdog.ps1 script evry 5mn (see TaskDuration in wsl_params.yml)
