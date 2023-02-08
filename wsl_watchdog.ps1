@@ -47,7 +47,6 @@ function LoadParams{
     $script:v4tov4IP        = [regex]::matches($(Invoke-Expression $ShowProxyV4ToV4), "(172\.\d{1,3}\.\d{1,3}\.\d{1,3})").value 
   }
  
- }
 function CheckProcess {
   $script:Restarted=$false
 
